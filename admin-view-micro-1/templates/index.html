@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Store Data in AWS SQS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      padding: 5px;
+    }
+
+    button {
+      padding: 8px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Store Data in AWS SQS</h1>
+
+  <form id="dataForm" action="/store_data" method="POST">
+    <label for="nameInput">Name:</label>
+    <input type="text" id="nameInput" name="name" placeholder="Enter your name" required>
+    <br>
+    <label for="emailInput">Email:</label>
+    <input type="text" id="emailInput" name="email" placeholder="Enter your email" required>
+    <br>
+    <label for="dataInput">Additional Data:</label>
+    <input type="text" id="dataInput" name="additional_data" placeholder="Enter additional data here" required>
+    <br>
+    <button type="submit">Store Data</button>
+  </form>
+</body>
+</html>

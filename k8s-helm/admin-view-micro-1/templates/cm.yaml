@@ -1,0 +1,10 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "admin-view-micro-1.fullname" . }}
+  labels:
+    {{- include "admin-view-micro-1.labels" . | nindent 4 }}
+data:
+  AWS_REGION: {{.Values.region | default "us-east-2" }}
+  QUEUE_URL: {{ .Values.queue_url | default "https://sqs.us-east-2.amazonaws.com/315073111691/sqs-python" }}
+  

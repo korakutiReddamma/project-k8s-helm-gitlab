@@ -1,0 +1,15 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "get-rds-micro-3.fullname" . }}
+  labels:
+    {{- include "get-rds-micro-3.labels" . | nindent 4 }}
+data:
+  DB_HOST: {{.Values.host | default "database-2.c7o6esgncobt.us-east-2.rds.amazonaws.com" }}
+  DB_USER: {{.Values.user | default "admin" }}
+  DB_PASSWORD: {{.Values.password | default "adminreddy" }}
+  DB_NAME: {{.Values.database | default "rdssqspy" }}
+  DB_TABLE: {{.Values.table_name | default "storedate" }}
+
+
+  

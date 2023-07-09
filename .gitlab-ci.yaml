@@ -1,0 +1,132 @@
+image: docker:20.10.16
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+services:
+- name: docker:19.03.0-dind
+  entrypoint: ["env", "-u", "DOCKER_HOST"]
+  command: ["dockerd-entrypoint.sh"]
+
+stages:
+- build
+- deploy
+
+
+admin-micro-build:
+  stage: build
+  script:
+  - cd admin-view-micro-1
+  - ls -ltr
+  - apk update
+  - apk add --no-cache curl jq python3 py3-pip
+  - pip install awscli
+  - docker ps
+  - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 315073111691.dkr.ecr.us-east-2.amazonaws.com
+  - docker build -t micro-1-frontend .
+  - docker tag micro-1-frontend:latest 315073111691.dkr.ecr.us-east-2.amazonaws.com/micro-1-frontend:latest
+  - docker push 315073111691.dkr.ecr.us-east-2.amazonaws.com/micro-1-frontend:latest
+  when: manual
+  tags:
+  - k8s-node
+
+sqs-micro-build:
+  stage: build
+  script:
+  - cd sqs-consumer-micro-2
+  - ls -ltr
+  - apk update
+  - apk add --no-cache curl jq python3 py3-pip
+  - pip install awscli
+  - docker ps
+  - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 315073111691.dkr.ecr.us-east-2.amazonaws.com
+  - docker build -t micro-2-sqs .
+  - docker tag micro-2-sqs:latest 315073111691.dkr.ecr.us-east-2.amazonaws.com/micro-2-sqs:latest
+  - docker push 315073111691.dkr.ecr.us-east-2.amazonaws.com/micro-2-sqs:latest
+  when: manual
+  tags:
+  - k8s-node
+
+end-micro-build:
+  stage: build
+  script:
+  - cd end-user-get-micro-3
+  - ls -ltr
+  - apk update
+  - apk add --no-cache curl jq python3 py3-pip
+  - pip install awscli
+  - docker ps
+  - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 315073111691.dkr.ecr.us-east-2.amazonaws.com
+  - docker build -t micro-3-get-rds .
+  - docker tag micro-3-get-rds:latest 315073111691.dkr.ecr.us-east-2.amazonaws.com/micro-3-get-rds:latest
+  - docker push 315073111691.dkr.ecr.us-east-2.amazonaws.com/micro-3-get-rds:latest
+  when: manual
+  tags:
+  - k8s-node
+
+dev-micro-admin:
+  image: dtzar/helm-kubectl:3.9.3
+  stage: deploy
+  script:
+
+  - echo "deploy the helm use"
+  - kubectl version --short --client
+  - helm version
+  - mkdir ~/.kube
+  - echo "$kube_config" | base64 -d >~/.kube/config
+  - apk add --no-cache curl jq python3 py3-pip
+  - pip install awscli
+  - kubectl get nodes
+  - kubectl get ns
+  - helm list
+  - helm upgrade --install admin-view-micro-1 ./k8s-helm/admin-view-micro-1 -n micro-admin
+
+  when: manual
+  tags:
+  - k8s-node
+
+dev-micro-sqs:
+  image: dtzar/helm-kubectl:3.9.3
+  stage: deploy
+  script:
+
+  - echo "deploy the helm use"
+  - kubectl version --short --client
+  - helm version
+  - mkdir ~/.kube
+  - echo "$kube_config" | base64 -d >~/.kube/config
+  - apk add --no-cache curl jq python3 py3-pip
+  - pip install awscli
+  - kubectl get nodes
+  - kubectl get ns
+  - helm list
+  - helm upgrade --install sqs-consumer-micro-2 ./k8s-helm/sqs-consumer-micro-2 -n micro-sqs
+  when: manual
+  tags:
+  - k8s-node
+
+dev-micro-end:
+  image: dtzar/helm-kubectl:3.9.3
+  stage: deploy
+  script:
+
+  - echo "deploy the helm use"
+  - kubectl version --short --client
+  - helm version
+  - mkdir ~/.kube
+  - echo "$kube_config" | base64 -d >~/.kube/config
+  - apk add --no-cache curl jq python3 py3-pip
+  - pip install awscli
+  - kubectl get nodes
+  - kubectl get ns
+  - helm list
+
+  - helm upgrade --install get-rds-micro-3 ./k8s-helm/get-rds-micro-3 -n micro-enduser
+  when: manual
+  tags:
+  - k8s-node
+
+
+

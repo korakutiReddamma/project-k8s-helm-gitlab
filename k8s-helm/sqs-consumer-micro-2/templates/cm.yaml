@@ -1,0 +1,17 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "sqs-consumer-micro-2.fullname" . }}
+  labels:
+    {{- include "sqs-consumer-micro-2.labels" . | nindent 4 }}
+data:
+  AWS_REGION: {{.Values.region | default "us-east-2" }}
+  QUEUE_URL: {{ .Values.queue_url | default "https://sqs.us-east-2.amazonaws.com/315073111691/sqs-python" }}
+  DB_HOST: {{.Values.db_host | default "database-2.c7o6esgncobt.us-east-2.rds.amazonaws.com" }}
+  DB_USER: {{.Values.db_user | default "admin" }}
+  DB_PASSWORD: {{.Values.db_password | default "adminreddy" }}
+  DB_NAME: {{.Values.db_name | default "rdssqspy" }}
+  DB_TABLE: {{.Values.db_table | default "storedate" }}
+
+
+  
